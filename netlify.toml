@@ -1,0 +1,53 @@
+# netlify.toml — NE RIEN deployment config
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# ─── Markdown Mirror Redirects ───────────────────────────────────────────────
+# Redirects /md/:slug.md → /?md=:slug so the SPA can intercept and serve
+# clean Markdown for AI crawlers and LLM indexers.
+# The :splat placeholder captures the full slug (including hyphens).
+
+[[redirects]]
+  from = "/md/*.md"
+  to = "/?md=:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/md/*"
+  to = "/?md=:splat"
+  status = 200
+  force = true
+
+# ─── Sitemap ─────────────────────────────────────────────────────────────────
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Content-Type = "application/xml; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+    X-Robots-Tag = "noindex"
+
+# ─── llms.txt (served as plain text) ─────────────────────────────────────────
+[[headers]]
+  for = "/llms.txt"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+    X-Robots-Tag = "all"
+
+# ─── Markdown mirrors (served as text/markdown) ───────────────────────────────
+[[headers]]
+  for = "/md/*"
+  [headers.values]
+    Content-Type = "text/markdown; charset=utf-8"
+    Cache-Control = "public, max-age=900"
+    X-Robots-Tag = "all"
+    Access-Control-Allow-Origin = "*"
+
+# ─── SPA fallback — all other routes → index.html ────────────────────────────
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
